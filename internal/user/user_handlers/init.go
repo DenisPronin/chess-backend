@@ -16,5 +16,9 @@ func InitHandlers(router *mux.Router, db *pgxpool.Pool) {
 
 	router.HandleFunc("/register", registerHandler.Register).Methods(http.MethodPost)
 
-	router.HandleFunc("/login", Login).Methods(http.MethodPost)
+	loginHandler := &LoginHandler{
+		UserRepo: userRepo,
+	}
+
+	router.HandleFunc("/login", loginHandler.Login).Methods(http.MethodPost)
 }
