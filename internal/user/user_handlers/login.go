@@ -1,4 +1,4 @@
-package user
+package user_handlers
 
 import (
 	"log"
@@ -10,6 +10,6 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
-func HandlerLogin(writer http.ResponseWriter, request *http.Request) {
+func Login(writer http.ResponseWriter, request *http.Request) {
 	log.Println("Login", request)
 }

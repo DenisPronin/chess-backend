@@ -1,4 +1,4 @@
-package db
+package database
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func Connect() {
+func Connect() *pgxpool.Pool {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("Error loading .env file")
@@ -26,7 +26,6 @@ func Connect() {
 	if err != nil {
 		log.Fatalf("Unable to connect to database: %v\n", err)
 	}
-	defer conn.Close()
 
 	err = conn.Ping(context.Background())
 	if err != nil {
@@ -34,4 +33,6 @@ func Connect() {
 	}
 
 	log.Println("Connected to database")
+
+	return conn
 }

@@ -1,7 +1,8 @@
 package main
 
 import (
-	"chess/internal/db"
+	"chess/internal/database"
+	"chess/internal/user/user_handlers"
 	"chess/internal/web/router"
 	"log"
 	"net/http"
@@ -9,13 +10,14 @@ import (
 
 func main() {
 	// DB
-	db.Connect()
+	db := database.Connect()
 
 	// HTTP server and router
-	r := router.Router()
+	newRouter := router.Router()
+	user_handlers.InitHandlers(newRouter, db)
 
 	log.Println("Starting server on :8080")
-	err := http.ListenAndServe(":8080", r)
+	err := http.ListenAndServe(":8080", newRouter)
 
 	if err != nil {
 		log.Fatalf("Error starting server: %v\n", err)
