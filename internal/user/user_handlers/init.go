@@ -7,18 +7,14 @@ import (
 	"net/http"
 )
 
-func InitHandlers(router *mux.Router, db *pgxpool.Pool) {
+func InitRouting(router *mux.Router, db *pgxpool.Pool) {
 	userRepo := user.NewRepositoryUser(db)
 
-	registerHandler := &RegisterHandler{
+	userHandler := &UserHandler{
 		UserRepo: userRepo,
 	}
 
-	router.HandleFunc("/register", registerHandler.Register).Methods(http.MethodPost)
+	router.HandleFunc("/register", userHandler.Register).Methods(http.MethodPost)
 
-	loginHandler := &LoginHandler{
-		UserRepo: userRepo,
-	}
-
-	router.HandleFunc("/login", loginHandler.Login).Methods(http.MethodPost)
+	router.HandleFunc("/login", userHandler.Login).Methods(http.MethodPost)
 }

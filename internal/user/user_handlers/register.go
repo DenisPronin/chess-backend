@@ -9,17 +9,13 @@ import (
 	"time"
 )
 
-type RegisterHandler struct {
-	UserRepo *user.RepositoryUser
-}
-
 type RegisterRequest struct {
 	Email    string `json:"email"`
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-func (h *RegisterHandler) Register(writer http.ResponseWriter, request *http.Request) {
+func (h *UserHandler) Register(writer http.ResponseWriter, request *http.Request) {
 	var req RegisterRequest
 
 	err := json.NewDecoder(request.Body).Decode(&req)
