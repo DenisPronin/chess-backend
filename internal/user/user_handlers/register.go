@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -51,5 +52,8 @@ func (h *UserHandler) Register(writer http.ResponseWriter, request *http.Request
 	}
 
 	writer.WriteHeader(http.StatusOK)
-	writer.Write([]byte("User registered successfully"))
+	_, err = writer.Write([]byte("User registered successfully"))
+	if err != nil {
+		log.Printf("Error writing response: %v", err)
+	}
 }

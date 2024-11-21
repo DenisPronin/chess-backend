@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"net/http"
 )
 
@@ -44,5 +45,8 @@ func (h *UserHandler) Login(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	writer.WriteHeader(http.StatusOK)
-	writer.Write([]byte("Login successful"))
+	_, err = writer.Write([]byte("Login successful"))
+	if err != nil {
+		log.Printf("Error writing response: %v", err)
+	}
 }
