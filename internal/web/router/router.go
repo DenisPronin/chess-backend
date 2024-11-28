@@ -1,15 +1,12 @@
 package router
 
 import (
-	"chess/internal/health"
 	"github.com/gorilla/mux"
-	"net/http"
 )
 
 func Router() *mux.Router {
 	router := mux.NewRouter()
+	api := router.PathPrefix("/api/v1").Subrouter()
 
-	router.HandleFunc("/health", health.HandlerHealth).Methods(http.MethodGet)
-
-	return router
+	return api
 }
