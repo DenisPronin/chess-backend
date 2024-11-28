@@ -5,13 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"net/http"
 	"time"
 )
-
-type RegisterHandler struct {
-	UserRepo *user.RepositoryUser
-}
 
 type RegisterRequest struct {
 	Email    string `json:"email"`
@@ -19,7 +16,7 @@ type RegisterRequest struct {
 	Password string `json:"password"`
 }
 
-func (h *RegisterHandler) Register(writer http.ResponseWriter, request *http.Request) {
+func (h *UserHandler) Register(writer http.ResponseWriter, request *http.Request) {
 	var req RegisterRequest
 
 	err := json.NewDecoder(request.Body).Decode(&req)
@@ -55,5 +52,8 @@ func (h *RegisterHandler) Register(writer http.ResponseWriter, request *http.Req
 	}
 
 	writer.WriteHeader(http.StatusOK)
-	writer.Write([]byte("User registered successfully"))
+	_, err = writer.Write([]byte("User registered successfully"))
+	if err != nil {
+		log.Printf("Error writing response: %v", err)
+	}
 }
