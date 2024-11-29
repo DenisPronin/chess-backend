@@ -27,3 +27,12 @@ func (rep *RepositoryUser) GetUserByUsernameOrEmail(ctx context.Context, email s
 	err := row.Scan(&user.ID, &user.Email, &user.Username, &user.Password, &user.CreatedAt)
 	return user, err
 }
+
+func (rep *RepositoryUser) GetUserByID(ctx context.Context, userID int) (*User, error) {
+	query := `SELECT id, email, username, password, created_at FROM users WHERE id = $1`
+	row := rep.DB.QueryRow(ctx, query, userID)
+
+	var user User
+	err := row.Scan(&user.ID, &user.Email, &user.Username, &user.Password, &user.CreatedAt)
+	return &user, err
+}

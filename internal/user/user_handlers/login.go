@@ -1,6 +1,8 @@
 package user_handlers
 
 import (
+	"chess/internal/auth"
+	"chess/internal/json_errors"
 	"context"
 	"encoding/json"
 	"golang.org/x/crypto/bcrypt"
@@ -19,33 +21,44 @@ func (h *UserHandler) Login(writer http.ResponseWriter, request *http.Request) {
 
 	err := json.NewDecoder(request.Body).Decode(&req)
 	if err != nil {
-		http.Error(writer, "Invalid request format", http.StatusBadRequest)
+		json_errors.CatchError(writer, http.StatusBadRequest, "Invalid request format")
 		return
 	}
 
 	if req.Password == "" {
-		http.Error(writer, "Missing required fields", http.StatusBadRequest)
+		json_errors.CatchError(writer, http.StatusBadRequest, "Missing required fields")
 		return
 	}
 
 	if req.Email == "" && req.Username == "" {
-		http.Error(writer, "Missing required fields", http.StatusBadRequest)
+		json_errors.CatchError(writer, http.StatusBadRequest, "Missing required fields")
 		return
 	}
 
 	user, err := h.UserRepo.GetUserByUsernameOrEmail(context.Background(), req.Email, req.Username)
 	if err != nil {
-		http.Error(writer, "Invalid username/email or password", http.StatusUnauthorized)
+		json_errors.CatchError(writer, http.StatusUnauthorized, "Invalid username/email or password")
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		http.Error(writer, "Invalid username/email or password", http.StatusUnauthorized)
+		json_errors.CatchError(writer, http.StatusUnauthorized, "Invalid username/email or password")
 		return
 	}
 
+	jwtToken, err := auth.GenerateJWT(user.ID, user.Username)
+	if err != nil {
+		log.Printf("Error generating JWT: %v", err)
+		json_errors.CatchError(writer, http.StatusInternalServerError, "Internal server error")
+		return
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusOK)
-	_, err = writer.Write([]byte("Login successful"))
+
+	response := map[string]string{"token": jwtToken}
+
+	err = json.NewEncoder(writer).Encode(response)
 	if err != nil {
 		log.Printf("Error writing response: %v", err)
 	}
