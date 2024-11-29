@@ -1,6 +1,7 @@
 package user_handlers
 
 import (
+	"chess/internal/auth"
 	"chess/internal/user"
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -17,4 +18,6 @@ func InitRouting(router *mux.Router, db *pgxpool.Pool) {
 	router.HandleFunc("/register", userHandler.Register).Methods(http.MethodPost)
 
 	router.HandleFunc("/login", userHandler.Login).Methods(http.MethodPost)
+
+	router.Handle("/profile", auth.JwtMiddleware(http.HandlerFunc(userHandler.Profile))).Methods(http.MethodGet)
 }

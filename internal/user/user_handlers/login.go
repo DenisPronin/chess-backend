@@ -1,6 +1,7 @@
 package user_handlers
 
 import (
+	"chess/internal/auth"
 	"context"
 	"encoding/json"
 	"golang.org/x/crypto/bcrypt"
@@ -44,8 +45,19 @@ func (h *UserHandler) Login(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	jwtToken, err := auth.GenerateJWT(user.ID, user.Username)
+	if err != nil {
+		log.Printf("Error generating JWT: %v", err)
+		http.Error(writer, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusOK)
-	_, err = writer.Write([]byte("Login successful"))
+
+	response := map[string]string{"token": jwtToken}
+
+	err = json.NewEncoder(writer).Encode(response)
 	if err != nil {
 		log.Printf("Error writing response: %v", err)
 	}
