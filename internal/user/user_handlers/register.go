@@ -1,11 +1,11 @@
 package user_handlers
 
 import (
+	"chess/internal/json_errors"
 	"chess/internal/user"
 	"context"
 	"encoding/json"
 	"golang.org/x/crypto/bcrypt"
-	"log"
 	"net/http"
 	"time"
 )
@@ -21,12 +21,12 @@ func (h *UserHandler) Register(writer http.ResponseWriter, request *http.Request
 
 	err := json.NewDecoder(request.Body).Decode(&req)
 	if err != nil {
-		http.Error(writer, "Invalid request format", http.StatusBadRequest)
+		json_errors.CatchError(writer, http.StatusBadRequest, "Invalid request format")
 		return
 	}
 
 	if req.Email == "" || req.Username == "" || req.Password == "" {
-		http.Error(writer, "Missing required fields", http.StatusBadRequest)
+		json_errors.CatchError(writer, http.StatusBadRequest, "Missing required fields")
 		return
 	}
 
@@ -34,7 +34,7 @@ func (h *UserHandler) Register(writer http.ResponseWriter, request *http.Request
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		http.Error(writer, "Failed to hash password", http.StatusInternalServerError)
+		json_errors.CatchError(writer, http.StatusInternalServerError, "Failed to hash password")
 		return
 	}
 
@@ -47,13 +47,13 @@ func (h *UserHandler) Register(writer http.ResponseWriter, request *http.Request
 
 	err = h.UserRepo.SaveUser(context.Background(), userModel)
 	if err != nil {
-		http.Error(writer, "Failed to save user", http.StatusInternalServerError)
+		json_errors.CatchError(writer, http.StatusInternalServerError, "Failed to save user")
 		return
 	}
 
 	writer.WriteHeader(http.StatusOK)
 	_, err = writer.Write([]byte("User registered successfully"))
 	if err != nil {
-		log.Printf("Error writing response: %v", err)
+		json_errors.CatchError(writer, http.StatusInternalServerError, "Error writing response")
 	}
 }

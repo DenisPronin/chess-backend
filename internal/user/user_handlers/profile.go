@@ -1,6 +1,7 @@
 package user_handlers
 
 import (
+	"chess/internal/json_errors"
 	"context"
 	"encoding/json"
 	"net/http"
@@ -9,13 +10,13 @@ import (
 func (h *UserHandler) Profile(writer http.ResponseWriter, request *http.Request) {
 	userID, ok := request.Context().Value("userID").(float64)
 	if !ok {
-		http.Error(writer, "Unauthorized", http.StatusUnauthorized)
+		json_errors.CatchError(writer, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
 	user, err := h.UserRepo.GetUserByID(context.Background(), int(userID))
 	if err != nil {
-		http.Error(writer, "User not found", http.StatusNotFound)
+		json_errors.CatchError(writer, http.StatusNotFound, "User not found")
 		return
 	}
 
@@ -25,7 +26,6 @@ func (h *UserHandler) Profile(writer http.ResponseWriter, request *http.Request)
 	err = json.NewEncoder(writer).Encode(user)
 
 	if err != nil {
-		http.Error(writer, "Failed to write response", http.StatusInternalServerError)
+		json_errors.CatchError(writer, http.StatusInternalServerError, "Error writing response")
 	}
-
 }

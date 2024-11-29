@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"chess/internal/json_errors"
 	"context"
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
@@ -12,8 +13,8 @@ import (
 func JwtMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		authHeader := request.Header.Get("Authorization")
-		if authHeader == "" {
-			http.Error(writer, "Authorization header missing", http.StatusUnauthorized)
+		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+			json_errors.CatchError(writer, http.StatusUnauthorized, "Authorization header missing")
 			return
 		}
 
@@ -21,7 +22,7 @@ func JwtMiddleware(next http.Handler) http.Handler {
 
 		secretKey := os.Getenv("JWT_SECRET_KEY")
 		if secretKey == "" {
-			http.Error(writer, "Secret key not set in environment variables", http.StatusInternalServerError)
+			json_errors.CatchError(writer, http.StatusInternalServerError, "Secret key not set in environment variables")
 			return
 		}
 
@@ -34,14 +35,14 @@ func JwtMiddleware(next http.Handler) http.Handler {
 		})
 
 		if err != nil || !token.Valid {
-			http.Error(writer, "Invalid token", http.StatusUnauthorized)
+			json_errors.CatchError(writer, http.StatusUnauthorized, "Invalid token")
 			return
 		}
 
 		exp, ok := claims["exp"].(float64)
 		if ok {
 			if time.Unix(int64(exp), 0).Before(time.Now()) {
-				http.Error(writer, "Token has expired", http.StatusUnauthorized)
+				json_errors.CatchError(writer, http.StatusUnauthorized, "Token has expired")
 				return
 			}
 		}
