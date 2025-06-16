@@ -37,12 +37,12 @@ func (h *UserHandler) Login(writer http.ResponseWriter, request *http.Request) {
 
 	user, err := h.UserRepo.GetUserByUsernameOrEmail(context.Background(), req.Email, req.Username)
 	if err != nil {
-		json_errors.CatchError(writer, http.StatusUnauthorized, "Invalid username/email or password")
+		json_errors.CatchError(writer, http.StatusBadRequest, "Invalid	 username/email or password")
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		json_errors.CatchError(writer, http.StatusUnauthorized, "Invalid username/email or password")
+		json_errors.CatchError(writer, http.StatusBadRequest, "Invalid username/email or password")
 		return
 	}
 
